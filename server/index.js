@@ -6,7 +6,10 @@ const app = express();
 
 app.use(express.json());
 
-const notes = [];
+const notes = [
+	{ user: "joey", heading: "test2", content: "hello mom" },
+	{ user: "joey", heading: "test4", content: "hello dad" },
+];
 const users = [];
 
 // fetch all notes for existing user
@@ -14,19 +17,22 @@ app.get("/api/notes", async (request, response) => {
 	const authorization = request.get("authorization");
 	const decodedToken = await jwt.decode(authorization, "test");
 	const username = decodedToken.username;
+	let currentUsersNotes = [];
 	notes.forEach((element) => {
-		if (element.user.includes(username)) {
-			response.status(200).json({ element });
+		if (!element.user.includes(username)) {
+			response.status(400).json({ message: "unauthorized" });
+		} else {
+			currentUsersNotes.push(element);
 		}
-		response.status(400).json({ message: "unauthorized" });
 	});
+	response.status(200).json(currentUsersNotes);
 });
 
 // create a note for existing user only
-app.post("/api/notes",async (request, response) => {
-	const { heading, content } = request.body;
+app.post("/api/notes", async (request, response) => {
 	const authorization = request.get("authorization");
-	const decodedToken = await jwt.decode(authorization, "test");
+	const { heading, content } = request.body;
+	const decodedToken = jwt.decode(authorization, "test");
 	const username = decodedToken.username;
 
 	users.forEach((element) => {
@@ -39,9 +45,10 @@ app.post("/api/notes",async (request, response) => {
 			};
 			notes.push(newNote);
 			response.status(201).json(newNote);
+		} else {
+			response.status(400).json({ message: "unauthorized" });
 		}
 	});
-    response.status(400).json({message: 'unauthorized'})
 });
 // update a note
 // delete a note
@@ -59,8 +66,13 @@ app.post("/api/users", async (request, response) => {
 		password: passwordHash,
 	};
 
+	const newUserWithoutPassword = {
+		username,
+		name,
+	};
+
 	users.push(newUser);
-	response.status(201).json(newUser);
+	response.status(201).json(newUserWithoutPassword);
 });
 
 // provide existing user with token
@@ -76,7 +88,7 @@ app.post("/api/login", async (request, response) => {
 					password: element.password,
 				};
 
-				const signedToken = await jwt.sign(newToken, "test");
+				const signedToken = jwt.sign(newToken, "test");
 				return response.status(200).json({ token: signedToken });
 			}
 		} else {
