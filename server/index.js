@@ -9,7 +9,19 @@ app.use(express.json());
 const notes = [];
 const users = [];
 
-// fetch all notes
+// fetch all notes for existing user
+app.get('/api/notes', async(request, response)=>{
+    const authorization = request.get('authorization')
+    const decodedToken = await jwt.decode(authorization, "test")
+    const username = decodedToken.username
+    notes.forEach(element => {
+        if (element.user.includes(username)) {
+            response.status(200).json({element})
+        }
+        response.status(400).json({message: "unauthorized"})
+    });
+})
+
 // create a note
 app.post("/api/notes", (request, response) => {
 	const { heading, content } = request.body;
