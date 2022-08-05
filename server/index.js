@@ -17,19 +17,28 @@ mongoose
 // model for notes
 const noteSchema = new mongoose.Schema({
 	heading: String,
-	content: String
-})
+	content: String,
+});
 
-const NoteModel = mongoose.model("NoteModel", noteSchema)
+const NoteModel = mongoose.model("NoteModel", noteSchema);
 
 // model for user
 const userSchema = new mongoose.Schema({
 	username: String,
 	name: String,
-	password: String
-})
+	password: String,
+});
 
-const UserModel = mongoose.model("UserModel", userSchema)
+userSchema.set("toJSON", {
+	transform: (document, returnedObject) => {
+		(returnedObject.id = returnedObject._id.toString());
+			delete returnedObject._id;
+			delete returnedObject.__v;
+		delete returnedObject.password;
+	},
+});
+
+const UserModel = mongoose.model("UserModel", userSchema);
 
 // fetch all notes for existing user
 app.get("/api/notes", async (request, response) => {
@@ -115,20 +124,14 @@ app.post("/api/users", async (request, response) => {
 
 	const passwordHash = await bcrypt.hash(password, 10);
 
-	const newUser = {
-		id: users.length + 1,
+	const newUser = new UserModel({
 		username,
 		name,
 		password: passwordHash,
-	};
+	});
 
-	const newUserWithoutPassword = {
-		username,
-		name,
-	};
-
-	users.push(newUser);
-	response.status(201).json(newUserWithoutPassword);
+	const results = await newUser.save();
+	response.status(201).json(results);
 });
 
 // provide existing user with token
