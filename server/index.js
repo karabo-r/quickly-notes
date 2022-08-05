@@ -68,24 +68,15 @@ app.post("/api/notes", async (request, response) => {
 });
 
 // update a note
-app.put("/api/notes/:id", (request, response) => {
-	const id = Number(request.params.id);
+app.put("/api/notes/:id", async (request, response) => {
+	const id = request.params.id;
 	const { heading, content } = request.body;
-	const authorization = request.get("authorization");
-	const decodedToken = jwt.decode(authorization, "test");
-	if (decodedToken) {
-		notes.forEach((element) => {
-			if (element.id === id) {
-				const noteIndex = notes.indexOf(element);
-				const updatedNote = {
-					heading,
-					content,
-				};
-				notes.splice(noteIndex, 1, updatedNote);
-				response.json({ message: "note has been updated" });
-			}
-		});
-	}
+	const updateNote = {
+		heading,
+		content,
+	};
+	const results = await Notes.findById(id, updateNote, { new: true });
+	response.json(results)
 });
 // delete a note
 app.delete("/api/notes/:id", (request, response) => {
