@@ -14,6 +14,23 @@ mongoose
 	.connect(process.env.MONGO_URI)
 	.then(console.log("connected to database"));
 
+// model for notes
+const noteSchema = new mongoose.Schema({
+	heading: String,
+	content: String
+})
+
+const NoteModel = mongoose.model("NoteModel", noteSchema)
+
+// model for user
+const userSchema = new mongoose.Schema({
+	username: String,
+	name: String,
+	password: String
+})
+
+const UserModel = mongoose.model("UserModel", userSchema)
+
 // fetch all notes for existing user
 app.get("/api/notes", async (request, response) => {
 	const authorization = request.get("authorization");
