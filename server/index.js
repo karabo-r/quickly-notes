@@ -10,29 +10,38 @@ const notes = [];
 const users = [];
 
 // fetch all notes for existing user
-app.get('/api/notes', async(request, response)=>{
-    const authorization = request.get('authorization')
-    const decodedToken = await jwt.decode(authorization, "test")
-    const username = decodedToken.username
-    notes.forEach(element => {
-        if (element.user.includes(username)) {
-            response.status(200).json({element})
-        }
-        response.status(400).json({message: "unauthorized"})
-    });
-})
+app.get("/api/notes", async (request, response) => {
+	const authorization = request.get("authorization");
+	const decodedToken = await jwt.decode(authorization, "test");
+	const username = decodedToken.username;
+	notes.forEach((element) => {
+		if (element.user.includes(username)) {
+			response.status(200).json({ element });
+		}
+		response.status(400).json({ message: "unauthorized" });
+	});
+});
 
-// create a note
-app.post("/api/notes", (request, response) => {
+// create a note for existing user only
+app.post("/api/notes",async (request, response) => {
 	const { heading, content } = request.body;
+	const authorization = request.get("authorization");
+	const decodedToken = await jwt.decode(authorization, "test");
+	const username = decodedToken.username;
 
-	const newNote = {
-		heading,
-		content,
-	};
-
-	notes.push(newNote);
-	response.status(201).json(newNote);
+	users.forEach((element) => {
+		if (element.username.includes(username)) {
+			const newNote = {
+				id: notes.length + 1,
+				user: username,
+				heading,
+				content,
+			};
+			notes.push(newNote);
+			response.status(201).json(newNote);
+		}
+	});
+    response.status(400).json({message: 'unauthorized'})
 });
 // update a note
 // delete a note
@@ -68,7 +77,7 @@ app.post("/api/login", async (request, response) => {
 				};
 
 				const signedToken = await jwt.sign(newToken, "test");
-				return response.status(200).json({token:signedToken});
+				return response.status(200).json({ token: signedToken });
 			}
 		} else {
 			return response
