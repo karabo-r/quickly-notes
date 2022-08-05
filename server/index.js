@@ -20,7 +20,7 @@ const noteSchema = new mongoose.Schema({
 	content: String,
 });
 
-const NoteModel = mongoose.model("NoteModel", noteSchema);
+const Notes = mongoose.model("Notes", noteSchema);
 
 // model for user
 const userSchema = new mongoose.Schema({
@@ -31,14 +31,14 @@ const userSchema = new mongoose.Schema({
 
 userSchema.set("toJSON", {
 	transform: (document, returnedObject) => {
-		(returnedObject.id = returnedObject._id.toString());
-			delete returnedObject._id;
-			delete returnedObject.__v;
+		returnedObject.id = returnedObject._id.toString();
+		delete returnedObject._id;
+		delete returnedObject.__v;
 		delete returnedObject.password;
 	},
 });
 
-const UserModel = mongoose.model("UserModel", userSchema);
+const Users = mongoose.model("Users", userSchema);
 
 // fetch all notes for existing user
 app.get("/api/notes", async (request, response) => {
@@ -58,25 +58,13 @@ app.get("/api/notes", async (request, response) => {
 
 // create a note for existing user only
 app.post("/api/notes", async (request, response) => {
-	const authorization = request.get("authorization");
 	const { heading, content } = request.body;
-	const decodedToken = jwt.decode(authorization, "test");
-	const username = decodedToken.username;
-
-	users.forEach((element) => {
-		if (element.username.includes(username)) {
-			const newNote = {
-				id: notes.length + 1,
-				user: username,
-				heading,
-				content,
-			};
-			notes.push(newNote);
-			response.status(201).json(newNote);
-		} else {
-			response.status(400).json({ message: "unauthorized" });
-		}
+	const newNote = new Notes({
+		heading,
+		content,
 	});
+	const results = await newNote.save();
+	response.status(201).json(results);
 });
 
 // update a note
@@ -124,7 +112,7 @@ app.post("/api/users", async (request, response) => {
 
 	const passwordHash = await bcrypt.hash(password, 10);
 
-	const newUser = new UserModel({
+	const newUser = new Users({
 		username,
 		name,
 		password: passwordHash,
