@@ -7,15 +7,15 @@ const app = express();
 app.use(express.json());
 
 const notes = [
-	{ user: "joey", heading: "test2", content: "hello mom" },
-	{ user: "joey", heading: "test4", content: "hello dad" },
+	{ id: 1, user: "joey", heading: "test2", content: "hello mom" },
+	{ id: 2, user: "joey", heading: "test4", content: "hello dad" },
 ];
 const users = [];
 
 // fetch all notes for existing user
 app.get("/api/notes", async (request, response) => {
 	const authorization = request.get("authorization");
-	const decodedToken = await jwt.decode(authorization, "test");
+	const decodedToken = jwt.decode(authorization, "test");
 	const username = decodedToken.username;
 	let currentUsersNotes = [];
 	notes.forEach((element) => {
@@ -52,6 +52,39 @@ app.post("/api/notes", async (request, response) => {
 });
 // update a note
 // delete a note
+app.delete("/api/notes/:id", (request, response) => {
+	const id = Number(request.params.id)
+	const authorization = request.get("authorization");
+	const decodedToken = jwt.decode(authorization, "test");
+
+	if (decodedToken) {
+		notes.forEach(element => {
+			if (element.id === id) {
+				const noteIndex = notes.indexOf(element)
+				notes.splice(noteIndex, 1)
+				response.json({message: 'note delete'})
+				console.log(notes);
+			}else{
+				response.end()
+			}
+		});
+	}
+
+
+	// console.log(decodedToken.username);
+	// // if (decodedToken) {
+	// 	notes.forEach((element) => {
+	// 		if (element.id.includes(id)) {
+	// 			const noteIndex = notes.indexOf(element.id === id);
+	// 			notes.splice(noteIndex, 1);
+	// 			response.status(200).json({ message: "note has been deleted" });
+	// 		}else{
+
+	// 			response.status(400).json({ message: "unautorized" });
+	// 		}
+	// 	});
+	// }
+});
 
 // create a user
 app.post("/api/users", async (request, response) => {
