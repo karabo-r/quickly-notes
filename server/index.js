@@ -2,15 +2,17 @@ require("dotenv").config();
 const express = require("express");
 const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
+const morgan = require("morgan");
+const mongoose = require("mongoose");
 const app = express();
 
 app.use(express.json());
+app.use(morgan("tiny"));
 
-const notes = [
-	{ id: 1, user: "joey", heading: "test2", content: "hello mom" },
-	{ id: 2, user: "joey", heading: "test4", content: "hello dad" },
-];
-const users = [];
+// connect to database
+mongoose
+	.connect(process.env.MONGO_URI)
+	.then(console.log("connected to database"));
 
 // fetch all notes for existing user
 app.get("/api/notes", async (request, response) => {
@@ -52,40 +54,39 @@ app.post("/api/notes", async (request, response) => {
 });
 
 // update a note
-app.put('/api/notes/:id', (request, response)=>{
-	const id = Number(request.params.id)
-	const {heading, content} = request.body
+app.put("/api/notes/:id", (request, response) => {
+	const id = Number(request.params.id);
+	const { heading, content } = request.body;
 	const authorization = request.get("authorization");
 	const decodedToken = jwt.decode(authorization, "test");
-	if(decodedToken){
-		notes.forEach(element=>{
-			if(element.id === id){
-				const noteIndex = notes.indexOf(element)
+	if (decodedToken) {
+		notes.forEach((element) => {
+			if (element.id === id) {
+				const noteIndex = notes.indexOf(element);
 				const updatedNote = {
 					heading,
-					content
-				}
-				notes.splice(noteIndex, 1, updatedNote)
-				response.json({message: 'note has been updated'})
+					content,
+				};
+				notes.splice(noteIndex, 1, updatedNote);
+				response.json({ message: "note has been updated" });
 			}
-		})
+		});
 	}
-
-})
+});
 // delete a note
 app.delete("/api/notes/:id", (request, response) => {
-	const id = Number(request.params.id)
+	const id = Number(request.params.id);
 	const authorization = request.get("authorization");
 	const decodedToken = jwt.decode(authorization, "test");
 
 	if (decodedToken) {
-		notes.forEach(element => {
+		notes.forEach((element) => {
 			if (element.id === id) {
-				const noteIndex = notes.indexOf(element)
-				notes.splice(noteIndex, 1)
-				response.json({message: 'note delete'})
-			}else{
-				response.end()
+				const noteIndex = notes.indexOf(element);
+				notes.splice(noteIndex, 1);
+				response.json({ message: "note delete" });
+			} else {
+				response.end();
 			}
 		});
 	}
