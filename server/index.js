@@ -50,7 +50,28 @@ app.post("/api/notes", async (request, response) => {
 		}
 	});
 });
+
 // update a note
+app.put('/api/notes/:id', (request, response)=>{
+	const id = Number(request.params.id)
+	const {heading, content} = request.body
+	const authorization = request.get("authorization");
+	const decodedToken = jwt.decode(authorization, "test");
+	if(decodedToken){
+		notes.forEach(element=>{
+			if(element.id === id){
+				const noteIndex = notes.indexOf(element)
+				const updatedNote = {
+					heading,
+					content
+				}
+				notes.splice(noteIndex, 1, updatedNote)
+				response.json({message: 'note has been updated'})
+			}
+		})
+	}
+
+})
 // delete a note
 app.delete("/api/notes/:id", (request, response) => {
 	const id = Number(request.params.id)
@@ -63,27 +84,11 @@ app.delete("/api/notes/:id", (request, response) => {
 				const noteIndex = notes.indexOf(element)
 				notes.splice(noteIndex, 1)
 				response.json({message: 'note delete'})
-				console.log(notes);
 			}else{
 				response.end()
 			}
 		});
 	}
-
-
-	// console.log(decodedToken.username);
-	// // if (decodedToken) {
-	// 	notes.forEach((element) => {
-	// 		if (element.id.includes(id)) {
-	// 			const noteIndex = notes.indexOf(element.id === id);
-	// 			notes.splice(noteIndex, 1);
-	// 			response.status(200).json({ message: "note has been deleted" });
-	// 		}else{
-
-	// 			response.status(400).json({ message: "unautorized" });
-	// 		}
-	// 	});
-	// }
 });
 
 // create a user
