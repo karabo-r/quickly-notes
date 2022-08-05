@@ -1,44 +1,68 @@
-require('dotenv').config()
-const express = require('express')
-const bcrypt = require('bcrypt')
-const app = express()
+require("dotenv").config();
+const express = require("express");
+const jwt = require("jsonwebtoken");
+const bcrypt = require("bcrypt");
+const app = express();
 
-app.use(express.json())
+app.use(express.json());
 
-const notes = []
-const users = []
+const notes = [];
+const users = [];
 
 // fetch all notes
 // create a note
-app.post('/api/notes', (request, response)=>{
-    const {heading, content} = request.body
+app.post("/api/notes", (request, response) => {
+	const { heading, content } = request.body;
 
-    const newNote = {
-        heading,
-        content
-    }
+	const newNote = {
+		heading,
+		content,
+	};
 
-    notes.push(newNote)
-    response.status(201).json(newNote)
-})
+	notes.push(newNote);
+	response.status(201).json(newNote);
+});
 // update a note
 // delete a note
 
 // create a user
-app.post('/api/users' ,async (request,response)=>{
-    const {username, name, password} = request.body
+app.post("/api/users", async (request, response) => {
+	const { username, name, password } = request.body;
 
-    const passwordHash = await bcrypt.hash(password, 10)
+	const passwordHash = await bcrypt.hash(password, 10);
 
-    const newUser = {
-        username,
-        name,
-        password: passwordHash
-    }
+	const newUser = {
+		id: users.length + 1,
+		username,
+		name,
+		password: passwordHash,
+	};
 
-    users.push(newUser)
-    response.status(201).json(newUser)
-})
+	users.push(newUser);
+	response.status(201).json(newUser);
+});
 
 // provide existing user with token
-app.listen(3000, console.log('server is now live'))
+app.post("/api/login", async (request, response) => {
+	const { username, password } = request.body;
+
+	users.forEach(async (element) => {
+		if (element.username.includes(username)) {
+			const checkPassword = await bcrypt.compare(password, element.password);
+			if (checkPassword) {
+				const newToken = {
+					username,
+					password: element.password,
+				};
+
+				const signedToken = await jwt.sign(newToken, "test");
+				return response.status(200).json({token:signedToken});
+			}
+		} else {
+			return response
+				.status(400)
+				.json({ message: "username or password is invalid" });
+		}
+	});
+});
+app.listen(3000, console.log("server is now live"));
