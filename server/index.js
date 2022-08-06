@@ -76,7 +76,7 @@ app.put("/api/notes/:id", async (request, response) => {
 		content,
 	};
 	const results = await Notes.findById(id, updateNote, { new: true });
-	response.json(results)
+	response.json(results);
 });
 // delete a note
 app.delete("/api/notes/:id", (request, response) => {
@@ -97,7 +97,7 @@ app.delete("/api/notes/:id", (request, response) => {
 	}
 });
 
-// create a user
+// create a user on database
 app.post("/api/users", async (request, response) => {
 	const { username, name, password } = request.body;
 
@@ -113,27 +113,24 @@ app.post("/api/users", async (request, response) => {
 	response.status(201).json(results);
 });
 
-// provide existing user with token
+// provide existing user on database with token
 app.post("/api/login", async (request, response) => {
 	const { username, password } = request.body;
+	const loggedUser = await Users.findOne({ username });
 
-	users.forEach(async (element) => {
-		if (element.username.includes(username)) {
-			const checkPassword = await bcrypt.compare(password, element.password);
-			if (checkPassword) {
-				const newToken = {
-					username,
-					password: element.password,
-				};
+	if (loggedUser) {
+		const checkPassword = bcrypt.compare(password, loggedUser.password);
+		if (checkPassword) {
+			const credentials = {
+				username,
+				password: loggedUser.password,
+			};
 
-				const signedToken = jwt.sign(newToken, "test");
-				return response.status(200).json({ token: signedToken });
-			}
-		} else {
-			return response
-				.status(400)
-				.json({ message: "username or password is invalid" });
+			const signedToken = jwt.sign(credentials, "test");
+			response.status(201).json({ token: signedToken });
 		}
-	});
+	} else {
+		response.status(400).json({ message: "invalid credentials" });
+	}
 });
 app.listen(3000, console.log("server is now live"));
