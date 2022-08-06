@@ -8,6 +8,7 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
+app.use(fetchToken)
 
 // connect to database
 mongoose
@@ -40,20 +41,32 @@ userSchema.set("toJSON", {
 
 const Users = mongoose.model("Users", userSchema);
 
-// fetch all notes for existing user
-app.get("/api/notes", async (request, response) => {
+// get authorization token from request
+function fetchToken(request, response, next) {
 	const authorization = request.get("authorization");
-	const decodedToken = jwt.decode(authorization, "test");
-	const username = decodedToken.username;
-	let currentUsersNotes = [];
-	notes.forEach((element) => {
-		if (!element.user.includes(username)) {
-			response.status(400).json({ message: "unauthorized" });
-		} else {
-			currentUsersNotes.push(element);
-		}
-	});
-	response.status(200).json(currentUsersNotes);
+	if (authorization) {
+		request.token = authorization;
+	}
+	next();
+}
+
+// get user credentials from token
+function decodeToken(request, response, next) {
+	const decodedCredentials = jwt.decode(request.token, "test");
+	if (decodedCredentials) {
+		request.user = decodedCredentials;
+	}
+	next();
+}
+
+// fetch all notes for existing user by user property in notes
+app.get("/api/notes", decodeToken, async  (request, response) => {
+	const user = request.user
+	if (user) {
+		const results = await Notes.find({user: user.username})
+		response.json(results)
+	}
+	// response.status(200).json(currentUsersNotes);
 });
 
 // create a note for existing user only
@@ -78,23 +91,12 @@ app.put("/api/notes/:id", async (request, response) => {
 	const results = await Notes.findById(id, updateNote, { new: true });
 	response.json(results);
 });
+
 // delete a note
 app.delete("/api/notes/:id", (request, response) => {
-	const id = Number(request.params.id);
-	const authorization = request.get("authorization");
-	const decodedToken = jwt.decode(authorization, "test");
-
-	if (decodedToken) {
-		notes.forEach((element) => {
-			if (element.id === id) {
-				const noteIndex = notes.indexOf(element);
-				notes.splice(noteIndex, 1);
-				response.json({ message: "note delete" });
-			} else {
-				response.end();
-			}
-		});
-	}
+	const id = request.params.id;
+	// const authorization = fetchToken(request)
+	// const
 });
 
 // create a user on database
