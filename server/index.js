@@ -65,19 +65,18 @@ app.get("/api/notes", decodeToken, async  (request, response) => {
 	if (user) {
 		const results = await Notes.find({user: user.username})
 		response.json(results)
+	}else{
+		response.status(400).end()
 	}
 	// response.status(200).json(currentUsersNotes);
 });
 
 // create a note for existing user only
-app.post("/api/notes", async (request, response) => {
+app.post("/api/notes", decodeToken ,async (request, response) => {
 	const { heading, content } = request.body;
-	const newNote = new Notes({
-		heading,
-		content,
-	});
-	const results = await newNote.save();
-	response.status(201).json(results);
+	if (condition) {
+		
+	}
 });
 
 // update a note
@@ -92,9 +91,15 @@ app.put("/api/notes/:id", async (request, response) => {
 	response.json(results);
 });
 
-// delete a note
-app.delete("/api/notes/:id", (request, response) => {
+// delete a note from database
+app.delete("/api/notes/:id",decodeToken, async (request, response) => {
 	const id = request.params.id;
+	const user = request.user
+	const doesUserExist = await Users.find({username: user.username})
+	if (doesUserExist) {
+		const results = await Notes.findByIdAndDelete(id)
+		response.json({deleted: results})
+	}
 	// const authorization = fetchToken(request)
 	// const
 });
