@@ -4,6 +4,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcrypt");
 const morgan = require("morgan");
 const mongoose = require("mongoose");
+const Users = require("./models/users");
+const Notes = require("./models/notes");
 const app = express();
 
 app.use(express.json());
@@ -14,32 +16,6 @@ app.use(fetchToken);
 mongoose
 	.connect(process.env.MONGO_URI)
 	.then(console.log("connected to database"));
-
-// model for notes
-const noteSchema = new mongoose.Schema({
-	heading: String,
-	content: String,
-});
-
-const Notes = mongoose.model("Notes", noteSchema);
-
-// model for user
-const userSchema = new mongoose.Schema({
-	username: String,
-	name: String,
-	password: String,
-});
-
-userSchema.set("toJSON", {
-	transform: (document, returnedObject) => {
-		returnedObject.id = returnedObject._id.toString();
-		delete returnedObject._id;
-		delete returnedObject.__v;
-		delete returnedObject.password;
-	},
-});
-
-const Users = mongoose.model("Users", userSchema);
 
 // get authorization token from request
 function fetchToken(request, response, next) {
@@ -55,12 +31,14 @@ async function decodeToken(request, response, next) {
 	const decodedCredentials = jwt.decode(request.token, "test");
 	if (decodedCredentials) {
 		// check if the user exists in the database
-		const doesUserExist = await Users.findOne({ username: decodedCredentials.username });
+		const doesUserExist = await Users.findOne({
+			username: decodedCredentials.username,
+		});
 		if (doesUserExist) {
-			const userData = doesUserExist
+			const userData = doesUserExist;
 			request.user = userData;
-		}else{
-			request.user = false
+		} else {
+			request.user = false;
 		}
 	}
 	next();
@@ -81,17 +59,17 @@ app.get("/api/notes", decodeToken, async (request, response) => {
 // create a note for existing user on database
 app.post("/api/notes", decodeToken, async (request, response) => {
 	const { heading, content } = request.body;
-	const user = request.user
+	const user = request.user;
 	if (user) {
 		const newNote = new Notes({
 			heading,
-			content
-		})
+			content,
+		});
 
-		const results = await newNote.save()
-		response.json({saved: results})
-	}else{
-		response.json({message: 'invalid credentials'})
+		const results = await newNote.save();
+		response.json({ saved: results });
+	} else {
+		response.json({ message: "invalid credentials" });
 	}
 });
 
@@ -139,16 +117,17 @@ app.post("/api/users", async (request, response) => {
 });
 
 // provide existing user on database with token
-app.post("/api/login", async (request, response) => {
+app.post("/api/login", decodeToken, async (request, response) => {
 	const { username, password } = request.body;
-	const loggedUser = await Users.findOne({ username });
+	// const loggedUser = await Users.findOne({ username });
+	const user = request.user;
 
-	if (loggedUser) {
-		const checkPassword = bcrypt.compare(password, loggedUser.password);
+	if (user) {
+		const checkPassword = bcrypt.compare(password, user.password);
 		if (checkPassword) {
 			const credentials = {
 				username,
-				password: loggedUser.password,
+				password: user.password,
 			};
 
 			const signedToken = jwt.sign(credentials, "test");
