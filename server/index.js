@@ -8,7 +8,7 @@ const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
-app.use(fetchToken)
+app.use(fetchToken);
 
 // connect to database
 mongoose
@@ -51,31 +51,47 @@ function fetchToken(request, response, next) {
 }
 
 // get user credentials from token
-function decodeToken(request, response, next) {
+async function decodeToken(request, response, next) {
 	const decodedCredentials = jwt.decode(request.token, "test");
 	if (decodedCredentials) {
-		request.user = decodedCredentials;
+		// check if the user exists in the database
+		const doesUserExist = await Users.findOne({ username: decodedCredentials.username });
+		if (doesUserExist) {
+			const userData = doesUserExist
+			request.user = userData;
+		}else{
+			request.user = false
+		}
 	}
 	next();
 }
 
 // fetch all notes for existing user by user property in notes
-app.get("/api/notes", decodeToken, async  (request, response) => {
-	const user = request.user
+app.get("/api/notes", decodeToken, async (request, response) => {
+	const user = request.user;
 	if (user) {
-		const results = await Notes.find({user: user.username})
-		response.json(results)
-	}else{
-		response.status(400).end()
+		const results = await Notes.find({ user: user.username });
+		response.json(results);
+	} else {
+		response.status(400).end();
 	}
 	// response.status(200).json(currentUsersNotes);
 });
 
-// create a note for existing user only
-app.post("/api/notes", decodeToken ,async (request, response) => {
+// create a note for existing user on database
+app.post("/api/notes", decodeToken, async (request, response) => {
 	const { heading, content } = request.body;
-	if (condition) {
-		
+	const user = request.user
+	if (user) {
+		const newNote = new Notes({
+			heading,
+			content
+		})
+
+		const results = await newNote.save()
+		response.json({saved: results})
+	}else{
+		response.json({message: 'invalid credentials'})
 	}
 });
 
@@ -92,16 +108,18 @@ app.put("/api/notes/:id", async (request, response) => {
 });
 
 // delete a note from database
-app.delete("/api/notes/:id",decodeToken, async (request, response) => {
+app.delete("/api/notes/:id", decodeToken, async (request, response) => {
 	const id = request.params.id;
-	const user = request.user
-	const doesUserExist = await Users.find({username: user.username})
+	const user = request.user;
+	const doesUserExist = await Users.find({ username: user.username });
 	if (doesUserExist) {
-		const results = await Notes.findByIdAndDelete(id)
-		response.json({deleted: results})
+		const results = await Notes.findByIdAndDelete(id).catch(
+			response.json({ message: "No blog with that id" }),
+		);
+		response.json({ deleted: results });
+	} else {
+		response.json({ message: "invalid credentials" });
 	}
-	// const authorization = fetchToken(request)
-	// const
 });
 
 // create a user on database
