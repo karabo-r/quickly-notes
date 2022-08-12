@@ -6,11 +6,13 @@ const morgan = require("morgan");
 const mongoose = require("mongoose");
 const Users = require("./models/users");
 const Notes = require("./models/notes");
+const Middleware = require('./utils/middleware')
 const app = express();
 
 app.use(express.json());
 app.use(morgan("tiny"));
-app.use(fetchToken);
+app.use(Middleware.fetchToken);
+
 
 // connect to database
 mongoose
@@ -18,13 +20,6 @@ mongoose
 	.then(console.log("connected to database"));
 
 // get authorization token from request
-function fetchToken(request, response, next) {
-	const authorization = request.get("authorization");
-	if (authorization) {
-		request.token = authorization;
-	}
-	next();
-}
 
 // get user credentials from token
 async function decodeToken(request, response, next) {
@@ -102,6 +97,7 @@ app.delete("/api/notes/:id", decodeToken, async (request, response) => {
 
 // create a user on database
 app.post("/api/users", async (request, response) => {
+	await Users.deleteMany()
 	const { username, name, password } = request.body;
 
 	const passwordHash = await bcrypt.hash(password, 10);
