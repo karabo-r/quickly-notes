@@ -1,147 +1,77 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
-import NoteServices from "./services/notes";
+import axios from "axios";
+import NoteScreen from "./components/NoteScreen";
+import Contacts from "./components/Contacts";
+
 const App = () => {
-	const [name, setName] = useState("");
-	const [username, setUsername] = useState("");
-	const [password, setPassword] = useState("");
+	const [isLoggedIn, setIsLoggedIn] = useState(false);
+	const [notes, setNotes] = useState([]);
+	const [user, setUser] = useState({
+		name: "",
+		username: "",
+		password: "",
+	});
+	const [activeNote, setActiveNote] = useState({
+		heading: "",
+		content: "",
+	});
 
-	const handleName = (e) => setName(e.target.value);
-	const handleUsername = (e) => setUsername(e.target.value);
-	const handlePassword = (e) => setPassword(e.target.value);
+	const handleNameState = (e) => setUser({ ...user, name: e.target.value });
+	const handleUsernameState = (e) =>setUser({ ...user, username: e.target.value });
+	const handlePasswordState = (e) =>setUser({ ...user, password: e.target.value });
 
-	function loginUser() {}
+	const handleHeadingState = (e) => setActiveNote({ ...activeNote, heading: e.target.value });
+	const handleContentState = (e) => setActiveNote({ ...activeNote, content: e.target.value });
 
-	function registerUser(e) {
-		e.preventDefault();
-		const newUser = {
-			name,
-			username,
-			password,
-		};
-		NoteServices.createUser(newUser);
+	function handleSaveButton() {
+		// check if this is an existing note, then update original note
+		if(activeNote.id){
+			const newNotes = {
+				...notes,
+				activeNote
+			}
+			axios.put('http://localhost:3001/notes', {newNotes}).then(console.log('saved'))
+		}
+	}
+	function handleEditNote(note) {
+		setActiveNote({
+			...note,
+			id: note.id
+		})
+		// console.log(te);
 	}
 
+	useEffect(() => {
+		axios.get("http://localhost:3001/notes").then((response) => {
+			response.data.forEach((element) => {
+				element.display = false;
+			});
+			setNotes(response.data);
+			console.log(response.data);
+		});
+		// setNotes(request.response.data)
+	}, []);
+
 	const propsCollection = {
-		name,
-		username,
-		password,
-		handleName,
-		handleUsername,
-		handlePassword,
-		registerUser,
-		loginUser,
+		notes,
+		setNotes,
+		activeNote,
+		setActiveNote,
+		isLoggedIn,
+		handleNameState,
+		handleUsernameState,
+		handlePasswordState,
+		handleHeadingState,
+		handleContentState,
+		handleSaveButton,
+		handleEditNote
 	};
 
 	return (
-		// <div style={{height: '100vh',display: 'flex', flexDirection: 'column'}}>
-
 		<Container>
-			<NoteScreen>
-				<div className="noteSidebar">
-					<div className="searchBox">
-						<div className="icons">icons</div>
-						{/* <div className="search"></div> */}
-					</div>
-					<div className="noteElements">
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-						<div className="noteCard">
-							<h1>Title</h1>
-							<p>content preview this is a test so hello mom</p>
-						</div>
-					</div>
-				</div>
-				<div className="noteEditor">
-					<input></input>
-					<textarea></textarea>
-				</div>
-			</NoteScreen>
-			<Contacts>
-				<h1 className="logo">Quickly</h1>
-				<div className="socials">
-					<a href="#">Twitter</a>
-					<a href="#">Github</a>
-				</div>
-			</Contacts>
+			<NoteScreen {...propsCollection} />
+			<Contacts />
 		</Container>
 		// </div>
 	);
@@ -151,131 +81,149 @@ const Container = styled.div`
 	height: 100vh;
 	display: grid;
 	grid-template-rows: 93% auto;
+	font-family: Arial, Helvetica, sans-serif;
 `;
 
-const NoteScreen = styled.div`
-	/* background-color: red; */
-	border: 1px solid gray;
-	display: grid;
-	grid-template-columns: 22% auto;
+// const NoteScreen = styled.div`
+// 	/* background-color: red; */
+// 	border: 1px solid gray;
+// 	display: grid;
+// 	grid-template-columns: 22% auto;
 
-	.noteSidebar {
-		/* border-right: 1px solid; */
-		display: grid;
-		grid-template-rows: 8% auto;
-		min-height: 0;
+// 	.noteSidebar {
+// 		/* border-right: 1px solid; */
+// 		display: grid;
+// 		grid-template-rows: 8% auto;
+// 		min-height: 0;
 
-		.searchBox {
-			display: flex;
-			align-items: center;
-			/* background-color: red; */
-			/* margin: auto; */
-			justify-content: center;
+// 		.searchBox {
+// 			display: flex;
+// 			align-items: center;
+// 			/* background-color: red; */
+// 			/* margin: auto; */
+// 			justify-content: center;
 
-			.icons {
-				background-color: white;
-				width: 80%;
-				height: 2rem;
-			}
-		}
+// 			.icons {
+// 				background-color: white;
+// 				width: 80%;
+// 				height: 2rem;
+// 			}
+// 		}
 
-		.noteElements {
-			flex: 1;
-			overflow: auto;
-			/* background-color: green; */
-			padding: 1.2rem;
-			display: flex;
-			flex-direction: column;
-			min-height: 0;
-			overflow-wrap: normal;
-			/* overflow-wrap: anywhere; */
+// 		.noteElements {
+// 			flex: 1;
+// 			overflow: auto;
+// 			/* background-color: green; */
+// 			padding: 1.2rem;
+// 			display: flex;
+// 			flex-direction: column;
+// 			min-height: 0;
+// 			overflow-wrap: normal;
+// 			/* overflow-wrap: anywhere; */
 
-			::-webkit-scrollbar {
-				width: 10px;
-				/* height: 1rem; */
-			}
+// 			::-webkit-scrollbar {
+// 				width: 10px;
+// 				/* height: 1rem; */
+// 			}
 
-			/* Track */
-			::-webkit-scrollbar-track {
-				background: #f1f1f1;
-			}
+// 			/* Track */
+// 			::-webkit-scrollbar-track {
+// 				background: #f1f1f1;
+// 			}
 
-			/* Handle */
-			::-webkit-scrollbar-thumb {
-				background: #888;
-				border-radius: 10px;
-			}
+// 			/* Handle */
+// 			::-webkit-scrollbar-thumb {
+// 				background: #888;
+// 				border-radius: 10px;
+// 			}
 
-			/* Handle on hover */
-			::-webkit-scrollbar-thumb:hover {
-				background: #555;
-			}
+// 			/* Handle on hover */
+// 			::-webkit-scrollbar-thumb:hover {
+// 				background: #555;
+// 			}
 
-			.noteCard {
-				/* background-color: purple; */
-				height: 10rem;
-				border-radius: 5px;
-				margin-bottom: 1rem;
-				cursor: pointer;
-				padding-top: 1rem;
-				padding-left: 1rem;
-				padding-bottom: 1rem;
+// 			.noteCard {
+// 				/* background-color: purple; */
+// 				border: 1px solid;
+// 				height: 3rem;
+// 				border-radius: 5px;
+// 				margin-bottom: 1rem;
+// 				cursor: pointer;
+// 				padding-top: 1rem;
+// 				padding-left: 1rem;
+// 				padding-bottom: 1rem;
 
-				h1 {
-					font-size: 1.2rem;
-				}
-			}
-		}
-	}
+// 				h1 {
+// 					font-size: 1rem;
+// 				}
 
-	.noteEditor {
-		/* padding: 3rem; */
-		padding-left: 2rem;
-		padding-right: 3rem;
-		padding-top: 3rem;
-		display: grid;
-		grid-template-rows: 8% auto;
-		align-content: right;
+// 				p{
+// 					font-size: 12px;
+// 				}
+// 			}
+// 		}
+// 	}
 
-		input,
-		textarea {
-			outline: none;
-			border: none;
-		}
+// 	.noteEditor {
+// 		/* padding: 3rem; */
+// 		padding-left: 2rem;
+// 		padding-right: 3rem;
+// 		padding-top: 1.5rem;
+// 		display: grid;
+// 		grid-template-rows: 8% auto;
+// 		align-content: right;
+// 		position: relative;
 
-		input {
-			font-size: 2rem;
-			border-bottom: 1px solid;
-		}
+// 		input,
+// 		textarea {
+// 			outline: none;
+// 			border: none;
+// 		}
 
-		textarea {
-			margin-top: 1rem;
-			font-size: 1rem;
-		}
-	}
-`;
+// 		input {
+// 			font-size: 2rem;
+// 			border-bottom: 1px solid;
+// 		}
 
-const Contacts = styled.div`
-	/* background-color: green; */
-	display: flex;
-	justify-content: space-between;
-	padding-left: 3rem;
-	padding-right: 3rem;
-	align-items: center;
+// 		textarea {
+// 			margin-top: 1rem;
+// 			font-size: 1rem;
+// 			resize: none
+// 		}
 
-	.logo {
-		font-size: 1.5rem;
-	}
+// 		button{
+// 			position: absolute;
+// 			bottom: 2rem;
+// 			padding-left: 2rem;
+// 			padding-right: 2rem;
+// 			padding-top: 0.7rem;
+// 			padding-bottom: 0.7rem;
+// 			outline: none;
+// 			margin-left: 2rem;
+// 		}
+// 	}
+// `;
 
-	.socials {
-		font-size: 1.2rem;
-	}
+// const Contacts = styled.div`
+// 	display: flex;
+// 	justify-content: space-between;
+// 	padding-left: 3rem;
+// 	padding-right: 3rem;
+// 	align-items: center;
 
-	.socials a {
-		margin: 10px;
-		text-decoration: none;
-		color: black;
-		outline: none;
-	}
-`;
+// 	.logo {
+// 		font-size: 1.5rem;
+// 	}
+
+// 	.socials {
+// 		font-size: 1.1rem;
+// 	}
+
+// 	.socials a {
+// 		margin-left: 10px;
+// 		text-decoration: none;
+// 		color: black;
+// 		outline: none;
+// 	}
+// `;
 export default App;

@@ -7,9 +7,13 @@ const mongoose = require("mongoose");
 const Users = require("./models/users");
 const Notes = require("./models/notes");
 const Middleware = require('./utils/middleware')
+const routers = require('./controllers/routers')
 const app = express();
 
 app.use(express.json());
+app.use('/api/login', routers.LoginRouter)
+app.use('/api/users', routers.UserRouter)
+app.use('/api/notes', routers.NoteRouter)
 app.use(morgan("tiny"));
 app.use(Middleware.fetchToken);
 
@@ -112,25 +116,5 @@ app.post("/api/users", async (request, response) => {
 	response.status(201).json(results);
 });
 
-// provide existing user on database with token
-app.post("/api/login", decodeToken, async (request, response) => {
-	const { username, password } = request.body;
-	// const loggedUser = await Users.findOne({ username });
-	const user = request.user;
 
-	if (user) {
-		const checkPassword = bcrypt.compare(password, user.password);
-		if (checkPassword) {
-			const credentials = {
-				username,
-				password: user.password,
-			};
-
-			const signedToken = jwt.sign(credentials, "test");
-			response.status(201).json({ token: signedToken });
-		}
-	} else {
-		response.status(400).json({ message: "invalid credentials" });
-	}
-});
 app.listen(3000, console.log("server is now live"));

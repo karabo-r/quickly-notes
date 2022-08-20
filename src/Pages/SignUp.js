@@ -27,7 +27,7 @@ const Container = styled.div`
 	justify-content: center;
 	/* background-color: teal; */
 	/* position: relative; */
-
+	
 	.login-container {
 		display: flex;
 		flex-direction: column;
@@ -40,13 +40,15 @@ const Container = styled.div`
 		/* background-color: teal; */
 
 		h1 {
-			font-size: 2rem;
+			font-size: 3rem;
 			margin-bottom: 2rem;
+			font-weight: 600;
 		}
 
 		p {
 			font-size: 1rem;
 			margin-bottom: 2rem;
+			opacity: 70%;
 		}
 
 		button{

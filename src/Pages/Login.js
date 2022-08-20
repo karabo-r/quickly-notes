@@ -22,6 +22,7 @@ const Container = styled.div`
 	display: flex;
 	height: 100vh;
 	/* width: 50%; */
+	font-weight: 600;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
@@ -40,13 +41,14 @@ const Container = styled.div`
 		/* background-color: teal; */
 
 		h1 {
-			font-size: 2rem;
+			font-size: 3rem;
 			margin-bottom: 2rem;
 		}
 
 		p {
 			font-size: 1rem;
 			margin-bottom: 2rem;
+			opacity: 70%;
 		}
 
 		button{
