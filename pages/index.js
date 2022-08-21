@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import axios from "axios";
-import NoteScreen from "./components/NoteScreen";
-import Contacts from "./components/Contacts";
+import NoteScreen from "../components/NoteScreen";
+import Contacts from "../components/Contacts";
+import Router from "next/router";
+
 
 const App = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -26,20 +28,27 @@ const App = () => {
 
 	function handleSaveButton() {
 		// check if this is an existing note, then update original note
-		if(activeNote.id){
-			axios
-			.put(`http://localhost:3001/notes/${activeNote.id}`, activeNote)
-			.then(()=>{
-				console.log('note updated');
-			})
+
+		if (isLoggedIn) {
+			
+			if(activeNote.id){
+				axios
+				.put(`http://localhost:3001/notes/${activeNote.id}`, activeNote)
+				.then(()=>{
+					console.log('note updated');
+				})
+			}else{
+				axios
+				.post(`http://localhost:3001/notes`, activeNote)
+				.then(()=>{
+					console.log('note has been updated successfully');
+					setNotes(notes.concat(activeNote))
+				})
+			}
 		}else{
-			axios
-            .post(`http://localhost:3001/notes`, activeNote)
-            .then(()=>{
-				console.log('note has been updated successfully');
-				setNotes(notes.concat(activeNote))
-			})
+			Router.push('/login')
 		}
+
 	}
 
 	// push current note to be edited on activeNote 
@@ -65,6 +74,11 @@ const App = () => {
 			setNotes(response.data);
 		});
 	}, []);
+
+	useEffect(()=>{
+		const userToken = localStorage.getItem('userToken');
+		if (userToken) setIsLoggedIn(true)
+	},[])
 
 	const propsCollection = {
 		notes,

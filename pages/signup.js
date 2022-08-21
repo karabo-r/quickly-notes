@@ -1,39 +1,40 @@
 import React from "react";
 import styled from "styled-components";
-const Login = () => {
+import Contacts from "../components/Contacts";
+const SignUp = () => {
 	return (
 		<Container>
 			<div className="login-container">
-				<h1>Login</h1>
-				<p>Login into your account to view your notes</p>
+				<h1>Sign Up</h1>
+				<p>Sign up to save your notes online</p>
 				<div className="inputs">
 					<input placeholder="Username" type="text"></input>
 					<br />
 					<input placeholder="Password" type="password"></input>
 				</div>
 				<button>Enter</button>
-				<div className="register-redirect">Sign Up</div>
+				<div className="login-redirect">Login</div>
 			</div>
+			<Contacts/>
 		</Container>
 	);
 };
 
 const Container = styled.div`
-	display: flex;
-	height: 100vh;
+	/* display: flex; */
+	/* height: 100vh; */
 	/* width: 50%; */
-	font-weight: 600;
 	flex-direction: column;
 	align-items: center;
 	justify-content: center;
 	/* background-color: teal; */
 	/* position: relative; */
-
+	
 	.login-container {
-		display: flex;
+		/* display: flex; */
 		flex-direction: column;
-		align-items: center;
-		justify-content: center;
+		/* align-items: center; */
+		/* justify-content: center; */
 		/* font-size: 2rem; */
 
 		height: 50%;
@@ -43,6 +44,7 @@ const Container = styled.div`
 		h1 {
 			font-size: 3rem;
 			margin-bottom: 2rem;
+			font-weight: 600;
 		}
 
 		p {
@@ -70,7 +72,7 @@ const Container = styled.div`
 			}
 		}
 
-		.register-redirect {
+		.login-redirect {
 			position: relative;
 			/* margin-top: 1rem */
 			bottom: -3rem;
@@ -78,4 +80,4 @@ const Container = styled.div`
 	}
 `;
 
-export default Login;
+export default SignUp;
