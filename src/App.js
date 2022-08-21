@@ -27,13 +27,22 @@ const App = () => {
 	function handleSaveButton() {
 		// check if this is an existing note, then update original note
 		if(activeNote.id){
-			const newNotes = {
-				...notes,
-				activeNote
-			}
-			axios.put('http://localhost:3001/notes', {newNotes}).then(console.log('saved'))
+			axios
+			.put(`http://localhost:3001/notes/${activeNote.id}`, activeNote)
+			.then(()=>{
+				console.log('note updated');
+			})
+		}else{
+			axios
+            .post(`http://localhost:3001/notes`, activeNote)
+            .then(()=>{
+				console.log('note has been updated successfully');
+				setNotes(notes.concat(activeNote))
+			})
 		}
 	}
+
+	// push current note to be edited on activeNote 
 	function handleEditNote(note) {
 		setActiveNote({
 			...note,
@@ -42,15 +51,19 @@ const App = () => {
 		// console.log(te);
 	}
 
+	function handleDeleteNote(id) {
+		axios
+		.delete(`http://localhost:3001/notes/${id}`)
+		.then(console.log('note has been deleted'))
+	}
+
 	useEffect(() => {
 		axios.get("http://localhost:3001/notes").then((response) => {
 			response.data.forEach((element) => {
 				element.display = false;
 			});
 			setNotes(response.data);
-			console.log(response.data);
 		});
-		// setNotes(request.response.data)
 	}, []);
 
 	const propsCollection = {
@@ -65,7 +78,8 @@ const App = () => {
 		handleHeadingState,
 		handleContentState,
 		handleSaveButton,
-		handleEditNote
+		handleEditNote,
+		handleDeleteNote
 	};
 
 	return (

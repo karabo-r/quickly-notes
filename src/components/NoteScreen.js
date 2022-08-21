@@ -16,8 +16,11 @@ const NoteScreen = (props) => {
 					{props.notes?.map((note) => {
 						return (
 							<div className="noteCard" key={note.id} onClick={()=>props.handleEditNote(note)}>
+								<div className="text">
 								<h1>{note.heading}</h1>
 								<p>{note.content}</p>
+								</div>
+								<button onClick={()=>props.handleDeleteNote(note.id)}>D</button>
 							</div>
 						);
 					})}
@@ -112,6 +115,8 @@ const Container = styled.div`
 				padding-top: 1rem;
 				padding-left: 1rem;
 				padding-bottom: 1rem;
+				display: flex;
+				justify-content: space-between;
 
 				h1 {
 					font-size: 1rem;
@@ -120,6 +125,15 @@ const Container = styled.div`
 
 				p {
 					font-size: 12px;
+				}
+
+				button{
+					/* background-color: #fff; */
+					outline: none;
+					border: none;
+					background-color: green;
+					color: whitesmoke;
+					margin-right: 15px;
 				}
 			}
 		}
