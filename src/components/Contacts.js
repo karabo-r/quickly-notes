@@ -22,7 +22,7 @@ const Container = styled.div`
 	/* padding-bottom: 2rem; */
 
 	.logo {
-		font-size: 1.4rem;
+		font-size: 1.7rem;
 		font-weight: 600;
 		display: flex;
 		align-items: center;

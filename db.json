@@ -1,34 +1,14 @@
 {
-  "notes": [
-    {
-      "id": 1,
-      "heading": "Sebastian",
-      "content": "Eschweiler",
-      "display": false
-    },
-    {
-      "id": 2,
-      "heading": "chiken",
-      "content": "testing adfsd",
-      "display": false
-    },
-    {
-      "heading": "test 2",
-      "content": "hello mom there",
-      "id": 3,
-      "display": false
-    }
-  ],
-  "users": [
-    {
-      "id": 1,
-      "name": "John",
-      "password": "password" 
-    },
-    {
-      "id": 2,
-      "name": "Jane",
-      "password":"password"
-    }
-  ]
-}
+    "notes": [
+      {
+        "id": 1,
+        "heading": "Sebastian",
+        "content": "Eschweiler"
+      },
+      {
+        "id": 2,
+        "heading": "chiken",
+        "content": "testing chiken"
+      }
+    ]
+  }
